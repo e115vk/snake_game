@@ -1,0 +1,75 @@
+<html>
+	<head>
+	</head>
+	<body>
+	<canvas id="gP" style="background-image: url(http://www.absolutegeeks.com/wp-content/uploads/2018/05/download.jpg)">
+	</canvas>
+	<script type="text/javascript">
+	var s_round = function(k, s){
+		return (Math.round( k / s) * s)
+	}
+	var rand = function (min, max) {
+		k = Math.floor(Math.random() * (max - min) + min); 
+		return s_round(k, s);
+	}
+	var newA = function () {
+		a = [rand(0, gP.width), rand(0, gP.height)];
+	}
+	var gP = document.getElementById('gP'), //Достаем canvas
+	g = gP.getContext('2d'), 
+	sBody = null, //Начально тело змейки - два элемента
+	d = 1, //Направление змейки 1 - право, 2 - вниз 3 - влево, 4 - вверх
+	a = null, //Яблоко, массив, 0 элемент - x, 1 элемнт - y
+	s = 30; //Размер пикселя
+	sBody = [{x: 0, y: 0}]; 
+	newA(); //Создаем яблоко
+	gP.width = 1207; //Ширина картинки
+	gP.height = 773; //Высота картинки
+	var snake = function(){
+		if (a[0] + s >= gP.width || a[1] + s >= gP.height) //Если яблоко на границе поля, создаем новое
+			newA(); 
+		g.clearRect(0,0,gP.width,gP.height); //Очищаем старое
+		g.fillStyle = "red"; 
+		g.fillRect(...a, s, s); //красим яблоко в красное
+		g.fillStyle = "#000";
+		sBody.forEach(function(el, i){
+			if (el.x == sBody[sBody.length - 1].x && el.y == sBody[sBody.length - 1].y && i < sBody.length - 1) 
+				sBody = [{x:0,y:0}], 
+				d = 1; //Проверка на столкновение змейки с собой
+		});
+		var m = sBody[0], 
+		f = {x: m.x,y: m.y}, 
+		l = sBody[sBody.length - 1]; // сохраняем хвост и голову змейки
+		if (d == 1)  f.x = l.x + s, f.y = l.y; //Если направление вправо, то тогда сохраняем Y, но меняем X на + s
+		if (d == 2) f.y = l.y + s, f.x = l.x; // Если направление вниз, то сохраняем X, но меняем Y на + s
+		if (d == 3) f.x = l.x - s, f.y = l.y; //Если направление влево, то сохраняем Y, но меняем X на -s
+		if (d == 4) f.y = l.y - s, f.x = l.x; //Если направление вверх, то сохраняем X, Но меняем Y на -s
+		sBody.push(f); //Добавляем хвост после головы с новыми координатами
+		sBody.splice(0,1); //Удаляем хвост
+		//Проверка столкновения с границами поля и яблоком
+		sBody.forEach(function(pob){
+			if (pob.x > s_round(gP.width, s) || pob.y > s_round(gP.height, s) || pob.x < 0 || pob.y < 0) 
+					sBody.splice(0,sBody.length-1), 
+					sBody = [{x:0,y:0}], 
+					d = 1; 
+			if (pob.x == a[0] && pob.y == a[1]) //Столкновение с яблоком произошло
+				newA(), 
+				sBody.unshift({x: f.x - s, y:l.y}) //Добавляем змейке элемент
+			g.fillRect(pob.x, pob.y, s, s);	//Рисуем змейку	
+		});
+	}
+	setInterval(snake, 1000/20);
+	onkeydown = function (e) {
+		var k = e.keyCode;
+		if ([38,39,40,37].indexOf(k) >= 0) 
+			//Останавливаем событие, отменяем его действие по умолчанию. На пример, при нажатии на стрелочку вверх мог произойти скролл, но он не произойдет, так как мы его отменили
+			e.preventDefault();
+		if (k == 39 && d != 3) d = 1; //Вправо
+		if (k == 40 && d != 4) d = 2; //Вниз
+		if (k == 37 && d != 1) d = 3; //Влево
+		if (k == 38 && d != 2) d = 4; //Вверх
+	};
+	</script>
+	</body>
+
+</html>
